@@ -70,13 +70,15 @@ Não presuma composição, preço, estoque ou venda separada de objetos que apar
 
 Edite `src/data/settings.ts`:
 
-- `demoPhoneLabel` contém o telefone fictício `(00) 00000-0000`, solicitado para a demonstração.
-- `whatsappNumber` permanece `null`. Isso impede abrir pedidos para um contato fictício; a prévia da mensagem continua copiável.
-- Para habilitar o envio, configure um número real confirmado, com DDI e DDD, somente em dígitos.
+- `storePhoneLabel` contém o contato informado pela loja: `+55 (89) 9409-5340`. Altere esse valor para atualizar o telefone mostrado e os links de contato.
+- `whatsappNumber` é derivado de `storePhoneLabel`, removendo a formatação: `558994095340`. O rodapé e o checkout usam esse número nos links do WhatsApp.
+- `demoPhoneLabel` é o texto de fallback quando o WhatsApp não está configurado. Se `whatsappNumber` for `null`, o envio fica desabilitado e a prévia da mensagem continua copiável.
 - `instagramUrl` controla o link do Instagram no rodapé. Confirme o perfil antes de publicar.
 - `fulfillmentModes` determina as modalidades exibidas. A configuração atual contém retirada; confirme a modalidade com a loja antes de uso real.
 
 O cliente confirma o envio no WhatsApp. O catálogo não registra vendas em servidor, não recebe pagamentos e não reduz estoque automaticamente. Dados pessoais do checkout não são armazenados no carrinho persistido.
+
+O fluxo de finalização, as validações e as alternativas para reabrir ou copiar a mensagem estão documentados em [Fluxo de pedidos](PEDIDOS.md). A mensagem e a validação ficam em `src/features/checkout/order.ts`; a apresentação do resumo e os estilos do checkout ficam nessa mesma pasta.
 
 ## Estilos e animações
 

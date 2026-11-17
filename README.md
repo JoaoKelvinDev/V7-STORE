@@ -15,10 +15,11 @@ Abra o endereço indicado pelo Vite, normalmente `http://localhost:3000`.
 | Conteúdo | Local |
 |---|---|
 | Como executar e verificar o projeto | [README do aplicativo](v7-store/README.md) |
+| Origem do novo front-end e das animações | [Importação do front-end](v7-store/docs/IMPORTACAO_FRONTEND.md) |
 | Estrutura, fotos, produtos e contatos | [Guia de manutenção](v7-store/docs/MANUTENCAO.md) |
 | Documento de requisitos recebido inicialmente | [Briefing original](v7-store/docs/BRIEFING_ORIGINAL.md) |
 | Código da loja | [`v7-store/src/`](v7-store/src/) |
 | Fotos originais e logo | [`v7-store/assets/originals/`](v7-store/assets/originals/) |
 | Imagens utilizadas pelo site | [`v7-store/public/assets/`](v7-store/public/assets/) |
 
-O telefone exibido é fictício. O envio pelo WhatsApp permanece desabilitado até a configuração de um número real.
+O contato da loja é **+55 (89) 9409-5340**. O rodapé e o checkout abrem o WhatsApp com a mensagem preenchida; o cliente confirma o envio no aplicativo.
