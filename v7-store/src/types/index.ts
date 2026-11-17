@@ -21,6 +21,7 @@ export interface Product {
   categoryId: string;
   priceCents: number | null; // BRL; null = preço não confirmado
   images: string[];
+  cardImagePosition?: string; // Enquadramento da capa no card (CSS object-position).
   featured: boolean;
   active: boolean;
   variants: ProductVariant[];

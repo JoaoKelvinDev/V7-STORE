@@ -15,9 +15,9 @@ export function HomePage() {
         <div className="container grid max-w-6xl items-center gap-8 py-12 md:grid-cols-2 md:py-20">
           <div className="space-y-5">
             <p className="text-sm font-semibold text-primary">V7 Store · Moda masculina</p>
-            <h1 className="text-5xl font-extrabold leading-[1.05] tracking-tight md:text-6xl">Vista seu<br />estilo.</h1>
+            <h1 className="text-[2.75rem] font-extrabold leading-[1.05] tracking-tight sm:text-5xl md:text-6xl">Vista seu<br />estilo.</h1>
             <p className="max-w-md text-lg leading-relaxed text-muted-foreground">Novos modelos, novas cores. Encontre a peça que combina com você e monte seu pedido no seu ritmo.</p>
-            <div className="flex flex-wrap items-center gap-3 pt-2">
+            <div className="flex flex-col gap-3 pt-2 sm:flex-row sm:flex-wrap sm:items-center">
               <Link to="/catalogo" className="btn-primary pressable">
                 Ver catálogo <ArrowRight className="h-4 w-4" />
               </Link>
@@ -25,7 +25,7 @@ export function HomePage() {
             </div>
           </div>
           <div className="overflow-hidden rounded-2xl border border-primary/25 bg-black p-3 sm:p-5">
-            <img src="/assets/brand/logo-v7.jpeg" alt="V7 Store — Vista seu estilo. Qualidade em cada detalhe, moda masculina, estilo e confiança." className="w-full" width={1536} height={1024} fetchPriority="high" />
+            <img src="/assets/brand/logo-v7.jpeg" alt="V7 Store — Vista seu estilo. Qualidade em cada detalhe, moda masculina, estilo e confiança." className="w-full" width={1536} height={1024} loading="eager" />
           </div>
         </div>
       </section>
@@ -38,9 +38,9 @@ export function HomePage() {
             </div>
             <Link to="/catalogo" className="back-link pressable">Ver tudo <ArrowRight className="h-4 w-4" /></Link>
           </div>
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
-            {featuredProducts.slice(0, 4).map(product => (
-              <ProductCard key={product.slug} product={product} />
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3">
+            {featuredProducts.slice(0, 4).map((product, index) => (
+              <ProductCard key={product.slug} product={product} index={index} />
             ))}
           </div>
         </section>
@@ -49,7 +49,7 @@ export function HomePage() {
         <h2 id="categories-title" className="mb-4 text-xl font-extrabold">Explore o catálogo</h2>
         <div className="grid grid-cols-3 gap-3">
           {cats.map(({ n, slug, i: I }) => (
-            <Link key={n} to={`/catalogo?categoria=${slug}`} className="category-link pressable flex flex-col items-center gap-2 rounded-xl border border-border bg-card p-3 text-sm font-semibold hover:border-primary sm:p-5">
+            <Link key={n} to={`/catalogo?categoria=${slug}`} className="category-link pressable flex min-h-20 flex-col items-center justify-center gap-2 rounded-xl border border-border bg-card p-3 text-center text-xs font-semibold hover:border-primary sm:p-5 sm:text-sm">
               <I className="h-6 w-6 text-primary" />
               {n}
             </Link>

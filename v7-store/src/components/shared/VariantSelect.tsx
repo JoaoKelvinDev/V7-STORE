@@ -42,7 +42,7 @@ export function VariantSelect({
         aria-invalid={error ? 'true' : 'false'}
         aria-required={required}
       >
-        <SelectTrigger id={label.toLowerCase()} className="w-full">
+        <SelectTrigger id={label.toLowerCase()} className="mt-2 w-full px-3 text-base data-[size=default]:h-11 sm:text-sm">
           <SelectValue placeholder={`Selecione ${label.toLowerCase()}`} />
         </SelectTrigger>
         <SelectContent>
@@ -83,7 +83,7 @@ export function ColorSizePicker({
   sizeError,
 }: ColorSizePickerProps) {
   return (
-    <div className="grid gap-4 sm:grid-cols-2">
+    <div className="grid grid-cols-2 gap-3 sm:gap-4">
       {colors.length > 0 && <VariantSelect
         label="Cor"
         options={colors}

@@ -6,7 +6,8 @@ import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { CartProvider, useCart } from '@/app/providers/CartProvider';
 import { ToastProvider } from '@/app/providers/ToastProvider';
-import { Header } from '@/components/layout/Header';
+import { Layout } from '@/components/layout/Layout';
+import { HomePage } from '@/features/catalog/HomePage';
 import { CatalogPage } from '@/features/catalog/CatalogPage';
 import { ProductPage } from '@/features/product/ProductPage';
 import { CartPage } from '@/features/cart/CartPage';
@@ -18,28 +19,55 @@ function shop(path = '/catalogo') {
   return render(
     <StrictMode>
       <CartProvider><ToastProvider><MemoryRouter initialEntries={[path]}>
-        <Header />
         <Routes>
+          <Route element={<Layout />}>
+          <Route path="/" element={<HomePage />} />
           <Route path="/catalogo" element={<CatalogPage />} />
           <Route path="/produto/:slug" element={<ProductPage />} />
           <Route path="/carrinho" element={<CartPage />} />
           <Route path="/finalizar" element={<CheckoutPage />} />
+          </Route>
         </Routes>
       </MemoryRouter></ToastProvider></CartProvider>
     </StrictMode>,
   );
 }
 
-beforeEach(() => localStorage.clear());
+beforeEach(() => {
+  localStorage.clear();
+  vi.spyOn(window, 'scrollTo').mockImplementation(() => {});
+});
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
 });
 
 describe('jornada de compra', () => {
+  it.each(products)('abre somente $name ao clicar no anúncio da página inicial', product => {
+    shop('/');
+    expect(screen.getByRole('contentinfo')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('link', { name: `Ver detalhes de ${product.name}` }));
+    expect(screen.getByRole('heading', { name: product.name, level: 1 })).toBeInTheDocument();
+    expect(screen.queryByRole('contentinfo')).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'O começo de uma grande história.' })).not.toBeInTheDocument();
+    for (const other of products.filter(p => p.id !== product.id)) {
+      expect(screen.queryByRole('heading', { name: other.name })).not.toBeInTheDocument();
+    }
+  });
+
+  it('retorna ao catálogo com a categoria e a busca usadas antes de abrir o produto', () => {
+    shop('/catalogo?categoria=camisetas&busca=caramelo');
+    expect(screen.queryByRole('contentinfo')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('link', { name: 'Ver detalhes de Camiseta Caramelo' }));
+    fireEvent.click(screen.getByRole('link', { name: 'Voltar ao catálogo' }));
+    expect(screen.getByRole('heading', { name: 'Catálogo — Camisetas' })).toBeInTheDocument();
+    expect(screen.getByRole('textbox', { name: 'Buscar produtos' })).toHaveValue('caramelo');
+    expect(screen.getAllByRole('link', { name: /^Ver detalhes de / })).toHaveLength(1);
+  });
+
   it('abre detalhes, adiciona, altera quantidade, persiste no refresh e atualiza a prévia', async () => {
     const view = shop();
-    fireEvent.click(screen.getAllByRole('link', { name: 'Ver detalhes' })[0]);
+    fireEvent.click(screen.getAllByRole('link', { name: /^Ver detalhes de / })[0]);
     expect(await screen.findByRole('heading', { name: 'Polo Verde Oliva' })).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Adicionar ao carrinho' }));
     fireEvent.click(screen.getByRole('link', { name: 'Carrinho, 1 itens' }));
@@ -69,7 +97,7 @@ describe('jornada de compra', () => {
     fireEvent.change(search, { target: { value: 'camiseta' } });
     expect(screen.getByText('Nenhum produto encontrado')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Limpar filtros' }));
-    expect(screen.getAllByRole('link', { name: 'Ver detalhes' })).toHaveLength(3);
+    expect(screen.getAllByRole('link', { name: /^Ver detalhes de / })).toHaveLength(3);
     fireEvent.change(search, { target: { value: 'inexistente' } });
     expect(screen.getByRole('button', { name: 'Limpar filtros' })).toBeInTheDocument();
   });

@@ -77,3 +77,18 @@ export function parseCartVersion(data: unknown): { items: CartItem[]; version: n
 
 export const CART_STORAGE_KEY = 'v7-store-cart';
 export const CART_VERSION = 1;
+
+/** True quando o usuário pediu menos movimento (ou o ambiente não informa, como em testes). */
+export function prefersReducedMotion(): boolean {
+  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return true;
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+/** Vibração curta de confirmação em celulares que suportam. */
+export function hapticTap(ms = 10): void {
+  try {
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator && !prefersReducedMotion()) navigator.vibrate(ms);
+  } catch {
+    /* ignorado: alguns navegadores bloqueiam vibração */
+  }
+}

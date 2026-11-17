@@ -1,8 +1,9 @@
 'use client';
 
-import { createContext, useContext, useReducer, useEffect, ReactNode, useCallback } from 'react';
+import { createContext, useContext, useReducer, useEffect, useState, ReactNode, useCallback } from 'react';
+import { CheckCircle2, Info, X, XCircle } from 'lucide-react';
 import type { Toast } from '@/types';
-import { generateId } from '@/utils/helpers';
+import { generateId, prefersReducedMotion } from '@/utils/helpers';
 
 type ToastAction =
   | { type: 'ADD'; payload: Toast }
@@ -59,7 +60,7 @@ function ToastContainer({ toasts, onDismiss }: { toasts: Toast[]; onDismiss: (id
   if (toasts.length === 0) return null;
 
   return (
-    <div className="fixed bottom-6 left-1/2 z-[100] flex w-[calc(100%-2rem)] max-w-md -translate-x-1/2 flex-col gap-2 pointer-events-none">
+    <div className="toast-stack fixed bottom-[max(1.5rem,env(safe-area-inset-bottom))] left-1/2 z-[100] flex w-[calc(100%-2rem)] max-w-md -translate-x-1/2 flex-col gap-2 pointer-events-none">
       {toasts.map(toast => (
         <ToastItem
           key={toast.id}
@@ -72,47 +73,51 @@ function ToastContainer({ toasts, onDismiss }: { toasts: Toast[]; onDismiss: (id
 }
 
 function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: (id: string) => void }) {
+  const [leaving, setLeaving] = useState(false);
+
+  // Saída mais rápida que a entrada; sem animação, remove na hora.
+  const close = useCallback(() => {
+    if (prefersReducedMotion()) {
+      onDismiss(toast.id);
+      return;
+    }
+    setLeaving(true);
+  }, [onDismiss, toast.id]);
+
   useEffect(() => {
     if (toast.duration !== 0) {
-      const timer = setTimeout(() => onDismiss(toast.id), toast.duration ?? 3000);
+      const timer = setTimeout(close, toast.duration ?? 3000);
       return () => clearTimeout(timer);
     }
-  }, [toast.id, toast.duration, onDismiss]);
+  }, [toast.duration, close]);
+
+  useEffect(() => {
+    if (!leaving) return;
+    const timer = setTimeout(() => onDismiss(toast.id), 180);
+    return () => clearTimeout(timer);
+  }, [leaving, onDismiss, toast.id]);
 
   const icons = {
-    success: (
-      <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-      </svg>
-    ),
-    error: (
-      <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-      </svg>
-    ),
-    info: (
-      <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-    ),
+    success: <CheckCircle2 className="check-draw h-5 w-5 shrink-0 text-[hsl(var(--success))]" aria-hidden="true" />,
+    error: <XCircle className="h-5 w-5 shrink-0 text-destructive" aria-hidden="true" />,
+    info: <Info className="h-5 w-5 shrink-0 text-primary" aria-hidden="true" />,
   };
 
   return (
     <div
-      className={`toast ${toast.type} pointer-events-auto animate-fade-in flex items-center gap-3 px-4 py-3`}
-      role="alert"
-      aria-live="polite"
+      className={`toast ${toast.type} pointer-events-auto flex items-center gap-3 px-4 py-3 ${leaving ? 'toast-out' : 'toast-in'}`}
+      role={toast.type === 'error' ? 'alert' : 'status'}
+      aria-live={toast.type === 'error' ? 'assertive' : 'polite'}
     >
       {icons[toast.type]}
       <span className="text-sm font-medium">{toast.message}</span>
       <button
-        onClick={() => onDismiss(toast.id)}
-        className="ml-auto text-muted-foreground hover:text-foreground transition-colors"
+        type="button"
+        onClick={close}
+        className="ml-auto -mr-2 grid h-10 w-10 shrink-0 place-items-center rounded-lg text-muted-foreground hover:bg-secondary hover:text-foreground"
         aria-label="Fechar notificação"
       >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-        </svg>
+        <X className="h-4 w-4" aria-hidden="true" />
       </button>
     </div>
   );

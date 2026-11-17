@@ -34,6 +34,7 @@ export function QuantityStepper({
         type="button"
         variant="outline"
         size="icon"
+        className="size-11"
         onClick={handleDecrement}
         disabled={disabled || value <= min}
         aria-label="Diminuir quantidade"
@@ -56,13 +57,14 @@ export function QuantityStepper({
         min={min}
         max={max}
         disabled={disabled}
-        className="w-16 text-center bg-background border-border text-foreground rounded-md py-2 px-2 focus:border-ring focus:ring-2 focus:ring-ring/50"
+        className="h-11 w-14 rounded-md border border-border bg-background px-2 text-center text-base font-semibold tabular-nums text-foreground focus:border-ring focus:ring-2 focus:ring-ring/50"
         aria-label={ariaLabel}
       />
       <Button
         type="button"
         variant="outline"
         size="icon"
+        className="size-11"
         onClick={handleIncrement}
         disabled={disabled || value >= max}
         aria-label="Aumentar quantidade"

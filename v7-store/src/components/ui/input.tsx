@@ -23,13 +23,13 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         <input
           ref={ref}
           id={inputId}
-          className={cn('input-field', error && 'border-destructive focus:border-destructive', className)}
+          className={cn('input-field', error && 'field-shake border-destructive focus:border-destructive', className)}
           aria-invalid={error ? 'true' : 'false'}
           aria-describedby={error ? `${inputId}-error` : helperText ? `${inputId}-helper` : undefined}
           {...props}
         />
         {error && (
-          <p id={`${inputId}-error`} className="mt-1 text-sm text-destructive" role="alert">
+          <p id={`${inputId}-error`} className="reveal mt-1 text-sm text-destructive" role="alert">
             {error}
           </p>
         )}

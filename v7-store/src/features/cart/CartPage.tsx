@@ -1,15 +1,32 @@
+import { useState, type CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
-import { Trash2, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Trash2, ArrowRight, ArrowLeft, ShoppingBag } from 'lucide-react';
 import { buttonVariants } from '@/components/ui/button';
 import { QuantityStepper } from '@/components/shared/QuantityStepper';
+import { AnimatedValue } from '@/components/shared/AnimatedValue';
 import { useCart } from '@/app/providers/CartProvider';
 import { products, getVariant } from '@/data/catalog';
-import { formatPrice, cn } from '@/utils/helpers';
+import { formatPrice, cn, prefersReducedMotion } from '@/utils/helpers';
 
 export function CartPage() {
   const { state, removeItem, updateQuantity, getSubtotalCents, hasUnavailableItems } = useCart();
   const subtotalCents = getSubtotalCents();
   const unavailable = hasUnavailableItems();
+  const [removing, setRemoving] = useState<string[]>([]);
+
+  // Recolhe o item antes de tirá-lo da lista, para o cliente ver o que saiu.
+  const handleRemove = (productId: string, variantId: string) => {
+    const key = `${productId}-${variantId}`;
+    if (prefersReducedMotion()) {
+      removeItem(productId, variantId);
+      return;
+    }
+    setRemoving(list => [...list, key]);
+    setTimeout(() => {
+      removeItem(productId, variantId);
+      setRemoving(list => list.filter(k => k !== key));
+    }, 280);
+  };
 
   return (
     <div className="container py-8">
@@ -17,45 +34,53 @@ export function CartPage() {
         <Link to="/catalogo" className="back-link pressable mb-5"><ArrowLeft className="h-4 w-4" aria-hidden="true" />Voltar ao catálogo</Link>
         <h1 className="mb-6 text-2xl font-extrabold">Seu carrinho</h1>
         {state.items.length === 0 ? (
-          <div className="rounded-xl border border-border bg-card p-8 text-center">
+          <div className="reveal rounded-xl border border-border bg-card p-8 text-center">
+            <ShoppingBag className="mx-auto mb-4 h-12 w-12 text-muted-foreground" aria-hidden="true" />
             <h2 className="mb-2 text-lg font-bold">Carrinho vazio</h2>
             <p className="mb-6 text-muted-foreground">Adicione produtos para começar seu pedido</p>
-            <Link to="/catalogo" className="btn-primary">Ver catálogo</Link>
+            <Link to="/catalogo" className="btn-primary pressable">Ver catálogo</Link>
           </div>
         ) : (
           <>
-            <div className="space-y-4" role="list" aria-label="Itens do carrinho">
-              {state.items.map(item => {
+            <div role="list" aria-label="Itens do carrinho">
+              {state.items.map((item, index) => {
                 const product = products.find(p => p.id === item.productId);
                 const variant = getVariant(item.productId, item.variantId);
                 const isUnavailable = !product?.active || !variant || variant.availability === 'unavailable';
                 const lineTotal = product?.priceCents != null ? product.priceCents * item.quantity : null;
 
+                const key = `${item.productId}-${item.variantId}`;
+                const isRemoving = removing.includes(key);
+
                 return (
-                  <article key={`${item.productId}-${item.variantId}`} role="listitem" className={cn('flex gap-3 rounded-xl border border-border bg-card p-3 sm:gap-4 sm:p-4', isUnavailable && 'border-destructive/50')}>
-                    {product && <Link to={`/produto/${product.slug}`} className="shrink-0"><img src={product.images[0]} alt={product.name} className="h-24 w-16 rounded-lg object-cover sm:w-20" /></Link>}
+                  <div key={key} role="listitem" className={cn('collapse-row', isRemoving && 'is-removing')} aria-hidden={isRemoving || undefined}>
+                  <div className="pb-4">
+                  <article className={cn('stagger-in flex gap-3 rounded-xl border border-border bg-card p-3 sm:gap-4 sm:p-4', isUnavailable && 'border-destructive/50')} style={{ '--i': index } as CSSProperties}>
+                    {product && <Link to={`/produto/${product.slug}`} className="pressable shrink-0 overflow-hidden rounded-lg"><img src={product.images[0]} alt={product.name} className="h-24 w-16 rounded-lg object-cover sm:w-20" /></Link>}
                     <div className="min-w-0 flex-1 space-y-2">
                       <p className="font-bold">{product?.name ?? 'Produto removido do catálogo'}</p>
                       <p className="text-sm text-muted-foreground">{[variant?.color, variant?.size].filter(Boolean).join(' · ')}</p>
-                      <p className="text-sm">{formatPrice(lineTotal)}</p>
+                      <p className="text-sm font-semibold tabular-nums"><AnimatedValue value={lineTotal}>{formatPrice(lineTotal)}</AnimatedValue></p>
                       {isUnavailable && <p className="text-sm text-destructive">Indisponível. Remova este item para continuar.</p>}
                       <QuantityStepper value={item.quantity} onChange={quantity => updateQuantity(item.productId, item.variantId, quantity)} disabled={isUnavailable} ariaLabel={`Quantidade de ${product?.name ?? 'produto'}`} />
                     </div>
-                    <button type="button" className="self-start rounded-lg p-2 text-muted-foreground hover:text-destructive" onClick={() => removeItem(item.productId, item.variantId)} aria-label={`Remover ${product?.name ?? 'produto'}`}><Trash2 className="h-4 w-4" /></button>
+                    <button type="button" className="-mr-1 -mt-1 grid h-11 w-11 shrink-0 place-items-center self-start rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive" onClick={() => handleRemove(item.productId, item.variantId)} disabled={isRemoving} aria-label={`Remover ${product?.name ?? 'produto'}`}><Trash2 className="h-4 w-4" aria-hidden="true" /></button>
                   </article>
+                  </div>
+                  </div>
                 );
               })}
             </div>
-            <div className="mt-6 space-y-4 rounded-xl border border-border bg-card p-5">
+            <div className="mt-2 space-y-4 rounded-xl border border-border bg-card p-5">
               <div className="flex flex-wrap justify-between gap-2 text-sm">
                 <span className="text-muted-foreground">Subtotal</span>
-                <span className="font-bold">{subtotalCents === null ? 'Valor a confirmar com a loja' : formatPrice(subtotalCents)}</span>
+                <AnimatedValue value={subtotalCents} className="font-bold tabular-nums">{subtotalCents === null ? 'Valor a confirmar com a loja' : formatPrice(subtotalCents)}</AnimatedValue>
               </div>
-              {unavailable ? <p role="alert" className="text-sm text-destructive">Remova os itens indisponíveis antes de finalizar.</p> : (
-                <Link to="/finalizar" className={cn(buttonVariants({ size: 'lg' }), 'w-full gap-2')}>Continuar pedido <ArrowRight className="h-4 w-4" /></Link>
+              {unavailable ? <p role="alert" className="reveal text-sm text-destructive">Remova os itens indisponíveis antes de finalizar.</p> : (
+                <Link to="/finalizar" className={cn(buttonVariants({ size: 'lg' }), 'group h-12 w-full gap-2 text-base font-bold')}>Continuar pedido <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" aria-hidden="true" /></Link>
               )}
             </div>
-            <Link to="/catalogo" className="mt-4 block text-center text-sm font-semibold text-primary">Continuar comprando</Link>
+            <Link to="/catalogo" className="pressable mx-auto mt-2 flex min-h-11 w-fit items-center px-4 text-sm font-semibold text-primary hover:underline">Continuar comprando</Link>
           </>
         )}
       </div>

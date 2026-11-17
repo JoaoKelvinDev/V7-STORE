@@ -51,6 +51,8 @@ images: [
 
 A primeira imagem é a capa do card. As outras aparecem na galeria. Fotos com calçados e acessórios não comprovam a venda de um kit; mantenha a associação com a peça cadastrada.
 
+Os cards usam capas quadradas para manter a grade uniforme no celular. O campo opcional `cardImagePosition` ajusta o foco da capa, por exemplo `'center 42%'`, usando CSS `object-position`. Ajuste o enquadramento para destacar a peça; o arquivo original e a imagem completa da página do produto são preservados.
+
 ## Produtos e disponibilidade
 
 Edite `src/data/catalog.ts`:
@@ -81,6 +83,10 @@ O cliente confirma o envio no WhatsApp. O catálogo não registra vendas em serv
 As cores e os movimentos ficam em `src/styles/globals.css`; os tokens de Tailwind ficam em `tailwind.config.ts`. A identidade usa a logo original, preto, azul e branco/prata.
 
 Os movimentos de clique, menu e navegação respeitam `prefers-reduced-motion`. Evite adicionar animações contínuas que dificultem a leitura ou a escolha das peças.
+
+O rodapé institucional aparece apenas na página inicial. Cada card é um único link para o produto anunciado; o retorno ao catálogo preserva os filtros usados antes da abertura. Links diretos para `/produto/<slug>` também abrem somente os detalhes da peça.
+
+No celular, a página do produto prioriza nome, preço e foto, com seletores de cor e tamanho lado a lado. A barra de adicionar ao carrinho fica fixa na parte inferior e respeita a área segura do aparelho; as notificações aparecem acima dela.
 
 ## Verificação e arquivos gerados
 

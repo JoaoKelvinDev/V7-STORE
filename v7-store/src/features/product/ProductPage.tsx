@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { Minus, Plus, ArrowLeft } from 'lucide-react';
+import { useState, useMemo, useEffect } from 'react';
+import { useParams, useLocation, Link } from 'react-router-dom';
+import { Minus, Plus, ArrowLeft, Check, ShoppingBag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ColorSizePicker, createVariantOptions, findMatchingVariant } from '@/components/shared/VariantSelect';
 import { categories, getProductBySlug } from '@/data/catalog';
@@ -10,7 +10,7 @@ import type { Product } from '@/types';
 import { NotFoundPage } from '@/features/catalog/NotFoundPage';
 import { useCart } from '@/app/providers/CartProvider';
 import { useToast } from '@/app/providers/ToastProvider';
-import { formatPrice } from '@/utils/helpers';
+import { formatPrice, hapticTap } from '@/utils/helpers';
 
 export function ProductPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -19,6 +19,9 @@ export function ProductPage() {
 }
 
 function ProductDetails({ product }: { product: Product }) {
+  const { state: navigationState } = useLocation();
+  const catalogUrl = typeof navigationState?.catalogUrl === 'string' && /^\/catalogo(?:\?|$)/.test(navigationState.catalogUrl)
+    ? navigationState.catalogUrl : '/catalogo';
   const { addItem, getItemQuantity } = useCart();
   const { showToast } = useToast();
 
@@ -30,6 +33,14 @@ function ProductDetails({ product }: { product: Product }) {
   const [colorError, setColorError] = useState('');
   const [sizeError, setSizeError] = useState('');
   const [isAdding, setIsAdding] = useState(false);
+  const [justAdded, setJustAdded] = useState(0);
+
+  // Mantém o "Adicionado" visível por um instante e depois volta ao normal.
+  useEffect(() => {
+    if (!justAdded) return;
+    const timer = setTimeout(() => setJustAdded(0), 1400);
+    return () => clearTimeout(timer);
+  }, [justAdded]);
 
   const { colors, sizes } = useMemo(() => createVariantOptions(product.variants), [product.variants]);
   const matchedVariant = useMemo(
@@ -64,6 +75,8 @@ function ProductDetails({ product }: { product: Product }) {
     setIsAdding(true);
     try {
       addItem(product.id, matchedVariant.id, quantity);
+      setJustAdded(n => n + 1);
+      hapticTap();
       showToast({
         type: 'success',
         message: `${product.name} adicionado ao carrinho`,
@@ -74,30 +87,32 @@ function ProductDetails({ product }: { product: Product }) {
   };
 
   return (
-    <div className="container py-6">
-      <Link to="/catalogo" className="back-link pressable mb-4">
-        <ArrowLeft className="h-4 w-4" /> Voltar ao catálogo
+    <div className="product-details container">
+      <Link to={catalogUrl} className="back-link pressable mb-4 min-h-11">
+        <ArrowLeft className="h-4 w-4" aria-hidden="true" /> Voltar ao catálogo
       </Link>
-      <div className="grid gap-8 md:grid-cols-2">
-        <div>
-          <img key={selectedImage} src={selectedImage} alt={product.name} className="gallery-photo aspect-[4/5] w-full rounded-2xl border border-border bg-secondary object-cover" />
+      <div className="grid min-w-0 gap-4 md:grid-cols-2 md:grid-rows-[auto_1fr] md:items-start md:gap-x-8 md:gap-y-6">
+        <div className="min-w-0 md:col-start-1 md:row-span-2 md:row-start-1">
+          <div className="product-gallery-frame">
+            <img key={selectedImage} src={selectedImage} alt={product.name} className="gallery-photo" width={800} height={1000} loading="eager" />
+          </div>
           {product.images.length > 1 && (
-            <div className="mt-3 flex gap-3" aria-label="Galeria do produto">
+            <div className="scrollbar-hide mt-3 flex gap-3 overflow-x-auto pb-1 [justify-content:safe_center]" aria-label="Galeria do produto">
               {product.images.map((image, index) => (
-                <button key={image} type="button" onClick={() => setSelectedImage(image)} aria-label={`Ver foto ${index + 1}`} aria-pressed={selectedImage === image} className="overflow-hidden rounded-lg border border-border p-1 aria-pressed:border-primary">
-                  <img src={image} alt="" className="h-20 w-16 object-cover" />
+                <button key={image} type="button" onClick={() => setSelectedImage(image)} aria-label={`Ver foto ${index + 1}`} aria-pressed={selectedImage === image} className="shrink-0 overflow-hidden rounded-lg border border-border p-1 opacity-70 hover:opacity-100 aria-pressed:border-primary aria-pressed:opacity-100 aria-pressed:ring-2 aria-pressed:ring-primary/30">
+                  <img src={image} alt="" className="h-12 w-10 bg-black/20 object-contain md:h-20 md:w-16" loading="lazy" />
                 </button>
               ))}
             </div>
           )}
         </div>
-        <div className="space-y-6">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-wider text-primary">{category}</p>
-            <h1 className="mt-1 text-3xl font-extrabold">{product.name}</h1>
-            <p className="mt-2 text-lg text-muted-foreground">{formatPrice(product.priceCents)}</p>
-            <p className={`mt-1 text-sm ${isVariantAvailable ? 'text-green-400' : 'text-destructive'}`}>{isVariantAvailable ? '● Disponível' : 'Indisponível'}</p>
-          </div>
+        <div className="order-first min-w-0 md:order-none md:col-start-2 md:row-start-1">
+          <p className="text-xs font-bold uppercase tracking-wider text-primary">{category}</p>
+          <h1 className="mt-1 text-2xl font-extrabold sm:text-3xl">{product.name}</h1>
+          <p className="mt-2 text-lg text-muted-foreground">{formatPrice(product.priceCents)}</p>
+          <p className={`mt-1 text-sm ${isVariantAvailable ? 'text-green-400' : 'text-destructive'}`}>{isVariantAvailable ? '● Disponível' : 'Indisponível'}</p>
+        </div>
+        <div className="min-w-0 space-y-5 md:col-start-2 md:row-start-2 md:space-y-6">
           <ColorSizePicker
             colors={colors}
             sizes={sizeOptions}
@@ -130,31 +145,46 @@ function ProductDetails({ product }: { product: Product }) {
               <button
                 type="button"
                 aria-label="Diminuir"
-                className="p-3"
+                className="grid h-11 w-11 place-items-center rounded-l-lg hover:bg-secondary disabled:opacity-40"
                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                disabled={quantity <= 1}
               >
-                <Minus className="h-4 w-4" />
+                <Minus className="h-4 w-4" aria-hidden="true" />
               </button>
-              <span className="w-10 text-center font-bold">{quantity}</span>
+              <span className="w-10 overflow-hidden text-center font-bold tabular-nums" aria-live="polite">
+                <span key={quantity} className="qty-tick">{quantity}</span>
+              </span>
               <button
                 type="button"
                 aria-label="Aumentar"
-                className="p-3"
+                className="grid h-11 w-11 place-items-center rounded-r-lg hover:bg-secondary disabled:opacity-40"
                 onClick={() => setQuantity(Math.min(99, quantity + 1))}
+                disabled={quantity >= 99}
               >
-                <Plus className="h-4 w-4" />
+                <Plus className="h-4 w-4" aria-hidden="true" />
               </button>
             </div>
           </div>
+          <div className="product-purchase-bar">
           <Button
             size="lg"
-            className="w-full"
+            className={`min-h-12 w-full gap-2 whitespace-normal px-3 py-3 text-sm font-bold leading-tight sm:text-base ${justAdded ? 'bg-[hsl(var(--success))] text-background hover:bg-[hsl(var(--success))]' : ''}`}
             onClick={handleAddToCart}
             disabled={!isVariantAvailable || isAdding}
           >
-            {isAdding ? 'Adicionando...' : inCartQuantity > 0 ? 'Adicionar mais ao carrinho' : 'Adicionar ao carrinho'}
+            {justAdded ? (
+              <span key={justAdded} className="animate-pop inline-flex items-center gap-2">
+                <Check className="check-draw h-5 w-5" strokeWidth={3} aria-hidden="true" />
+                Adicionado ao carrinho
+              </span>
+            ) : isAdding ? 'Adicionando...' : inCartQuantity > 0 ? 'Adicionar mais ao carrinho' : 'Adicionar ao carrinho'}
           </Button>
-          <p className="text-sm text-muted-foreground">{product.description}</p>
+          <Link to="/carrinho" aria-label="Ver carrinho" className="pressable grid h-12 w-12 place-items-center rounded-lg border border-border hover:border-primary hover:bg-secondary"><ShoppingBag className="h-5 w-5" aria-hidden="true" /></Link>
+          </div>
+          <section className="product-description min-w-0 border-t border-border pt-4" aria-labelledby="product-description-title">
+            <h2 id="product-description-title" className="mb-2 text-base font-bold">Sobre a peça</h2>
+            <p className="whitespace-pre-line break-words text-sm leading-relaxed text-muted-foreground">{product.description}</p>
+          </section>
         </div>
       </div>
     </div>

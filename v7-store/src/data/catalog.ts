@@ -16,6 +16,7 @@ export const products: Product[] = [
   {
     id: 'prod-1',
     slug: 'polo-verde-oliva',
+    cardImagePosition: 'center 42%',
     name: 'Polo Verde Oliva',
     description: 'Polo masculina em tom verde-oliva, corte reto e tecido confortável. Peça versátil para compor looks casuais ou esportivos.',
     categoryId: 'cat-2',
@@ -35,6 +36,7 @@ export const products: Product[] = [
   {
     id: 'prod-2',
     slug: 'camiseta-amarela',
+    cardImagePosition: 'center 85%',
     name: 'Camiseta Amarela Estampada',
     description: 'Camiseta amarela com estampa exclusiva. Modelagem regular, algodão macio. Foto mostra composição com acessórios (não inclusos).',
     categoryId: 'cat-1',
@@ -55,6 +57,7 @@ export const products: Product[] = [
   {
     id: 'prod-3',
     slug: 'camiseta-caramelo',
+    cardImagePosition: 'center 80%',
     name: 'Camiseta Caramelo',
     description: 'Camiseta em tom caramelo/marrom, tecido premium. Visual clean e atemporal. Foto inclui calçados e acessórios (vendidos separadamente).',
     categoryId: 'cat-1',
