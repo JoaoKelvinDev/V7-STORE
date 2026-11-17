@@ -33,7 +33,7 @@ Não substitua `.grid`, `.reveal` ou outros utilitários globais para compor as 
 
 Os cards usam a proporção 4:5 da referência. O catálogo continua com duas colunas no celular; a vitrine inicial empilha os cards em aparelhos estreitos, como na origem. A página da peça mantém a imagem inteira e a barra de compra com espaço reservado no conteúdo.
 
-As ações dos cards ficam visíveis em telas de toque e ao receber foco de teclado. Os tamanhos e os filtros têm áreas de toque de pelo menos 44 px. Nenhuma foto depende do site publicado ou do servidor de assets do Lovable.
+Cada foto dos cards mostra “Ver detalhes” e uma seta sobre um fundo escuro semitransparente, com desfoque suave e borda discreta. A indicação permanece visível no desktop e no celular, sem depender de hover; o card inteiro abre a peça. Os tamanhos, os filtros e a indicação sobre a foto têm áreas de toque de pelo menos 44 px. Nenhuma foto depende do site publicado ou do servidor de assets do Lovable.
 
 O rodapé usa três colunas no desktop. No celular, os dois grupos de links ficam lado a lado e o contato ocupa uma linha completa. Logo, textos, ícones e botão de voltar ao topo permanecem centralizados. Os links têm sublinhado discreto, ícones e área de toque de 44 px; o hover acrescenta um realce suave, sem blocos preenchidos ou bordas em cada opção. “Chamar no WhatsApp” recebe apenas destaque no texto azul, com o número `+55 (89) 9409-5340` logo abaixo; esse número também é usado no checkout.
 

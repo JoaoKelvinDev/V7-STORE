@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
+import { ArrowUpRight } from 'lucide-react';
 import type { Product } from '@/types';
 import { cn, formatPrice } from '@/utils/helpers';
 
@@ -26,7 +27,7 @@ export function ProductCard({ product, className, headingLevel = 2 }: ProductCar
       <div className="refresh-product-media">
         <img src={product.images[0]} alt={product.name} width={600} height={750} loading="lazy" style={{ objectPosition: product.cardImagePosition ?? 'center' }} />
         {tag && <span className="refresh-product-tag">{tag}</span>}
-        <span className="refresh-product-cta">Ver detalhes</span>
+        <span className="refresh-product-cta">Ver detalhes<ArrowUpRight size={17} aria-hidden="true" /></span>
       </div>
       <div className="refresh-product-meta">
         <Heading>{product.name}</Heading>
