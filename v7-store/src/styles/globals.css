@@ -43,6 +43,32 @@
   }
 }
 
+/* Mobile-native baseline */
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
+    overscroll-behavior: none;
+  }
+
+  input, textarea, select {
+    font-size: 16px;
+  }
+
+  button, a, [role="button"] {
+    touch-action: manipulation;
+  }
+
+  button, [role="button"] {
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    /* all :hover rules live here */
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -82,6 +108,9 @@
     @apply rounded-xl border border-border bg-card text-card-foreground;
   }
 
+  .wrap {
+    @apply w-full max-w-6xl mx-auto px-4;
+  }
   .container {
     @apply w-full max-w-6xl mx-auto px-4;
   }

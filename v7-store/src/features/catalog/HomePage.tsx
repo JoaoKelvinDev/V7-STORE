@@ -11,8 +11,8 @@ export function HomePage() {
 
   return (
     <>
-      <section className="bg-hero border-b border-border/60">
-        <div className="container grid max-w-6xl items-center gap-8 py-12 md:grid-cols-2 md:py-20">
+      <section className="bg-hero border-b border-border/60 min-h-svh">
+        <div className="wrap mx-auto max-w-6xl px-4 grid max-w-6xl items-start gap-8 py-12 md:grid-cols-2 md:py-20">
           <div className="space-y-5">
             <p className="text-sm font-semibold text-primary">V7 Store · Moda masculina</p>
             <h1 className="text-[2.75rem] font-extrabold leading-[1.05] tracking-tight sm:text-5xl md:text-6xl">Vista seu<br />estilo.</h1>
@@ -30,34 +30,38 @@ export function HomePage() {
         </div>
       </section>
       {featuredProducts.length > 0 && (
-        <section id="novidades" className="container scroll-mt-24 py-10 md:py-14" aria-labelledby="novidades-title">
-          <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <h2 id="novidades-title" className="text-2xl font-extrabold md:text-3xl">Novidades</h2>
-              <p className="mt-2 max-w-lg text-sm text-muted-foreground">Polo verde-oliva, camiseta estampada e caramelo. Veja as fotos e escolha seu estilo.</p>
+        <section id="novidades" className="scroll-mt-24 py-10 md:py-14" aria-labelledby="novidades-title">
+          <div className="wrap mx-auto max-w-6xl px-4">
+            <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <h2 id="novidades-title" className="text-2xl font-extrabold md:text-3xl">Novidades</h2>
+                <p className="mt-2 max-w-lg text-sm text-muted-foreground">Polo verde-oliva, camiseta estampada e caramelo. Veja as fotos e escolha seu estilo.</p>
+              </div>
+              <Link to="/catalogo" className="back-link pressable">Ver tudo <ArrowRight className="h-4 w-4" /></Link>
             </div>
-            <Link to="/catalogo" className="back-link pressable">Ver tudo <ArrowRight className="h-4 w-4" /></Link>
-          </div>
-          <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3">
-            {featuredProducts.slice(0, 4).map((product, index) => (
-              <ProductCard key={product.slug} product={product} index={index} />
-            ))}
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3">
+              {featuredProducts.slice(0, 4).map((product, index) => (
+                <ProductCard key={product.slug} product={product} index={index} />
+              ))}
+            </div>
           </div>
         </section>
       )}
-      <section className="container pb-12" aria-labelledby="categories-title">
-        <h2 id="categories-title" className="mb-4 text-xl font-extrabold">Explore o catálogo</h2>
-        <div className="grid grid-cols-3 gap-3">
-          {cats.map(({ n, slug, i: I }) => (
-            <Link key={n} to={`/catalogo?categoria=${slug}`} className="category-link pressable flex min-h-20 flex-col items-center justify-center gap-2 rounded-xl border border-border bg-card p-3 text-center text-xs font-semibold hover:border-primary sm:p-5 sm:text-sm">
-              <I className="h-6 w-6 text-primary" />
-              {n}
-            </Link>
-          ))}
+      <section className="pb-12" aria-labelledby="categories-title">
+        <div className="wrap mx-auto max-w-6xl px-4">
+          <h2 id="categories-title" className="mb-4 text-xl font-extrabold">Explore o catálogo</h2>
+          <div className="grid grid-cols-3 gap-3">
+            {cats.map(({ n, slug, i: I }) => (
+              <Link key={n} to={`/catalogo?categoria=${slug}`} className="category-link pressable flex min-h-20 flex-col items-center justify-center gap-2 rounded-xl border border-border bg-card p-3 text-center text-xs font-semibold hover:border-primary sm:p-5 sm:text-sm">
+                <I className="h-6 w-6 text-primary" />
+                {n}
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
       <section className="border-y border-border bg-card/40" aria-labelledby="brand-title">
-        <div className="container py-10 md:py-12">
+        <div className="wrap mx-auto max-w-6xl px-4 py-10 md:py-12">
           <div className="mb-8 max-w-xl">
             <p className="mb-2 text-sm font-semibold text-primary">V7 Store</p>
             <h2 id="brand-title" className="text-2xl font-extrabold md:text-3xl">O começo de uma grande história.</h2>

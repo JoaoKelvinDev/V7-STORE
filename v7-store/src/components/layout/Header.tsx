@@ -12,7 +12,6 @@ export function Header({ compact = false }: { compact?: boolean }) {
   const previousCount = useRef(cartCount);
   const [bumpKey, setBumpKey] = useState(0);
 
-  // A sacola só "salta" quando o cliente adiciona algo, não ao abrir a página.
   useEffect(() => {
     if (cartCount > previousCount.current) setBumpKey(key => key + 1);
     previousCount.current = cartCount;
@@ -20,7 +19,7 @@ export function Header({ compact = false }: { compact?: boolean }) {
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
-      <div className="container grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 py-2">
+      <div className="wrap mx-auto max-w-6xl px-4 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 py-2">
         <Link to="/" className="pressable flex min-w-0 items-center gap-3" aria-label="V7 Store — início">
           <img src="/assets/brand/logo-v7.jpeg" alt="V7 Store" className="h-11 w-auto shrink-0 rounded-md" />
           <span className="hidden truncate text-sm font-extrabold tracking-widest min-[420px]:inline sm:hidden">V7 STORE</span>

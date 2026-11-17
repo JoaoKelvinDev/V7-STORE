@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import { ArrowUp, Clock, MapPin, Home, LayoutGrid, ShoppingBag, Shirt, Layers, Footprints, Wallet, Compass, Headset, Tag, type LucideIcon } from 'lucide-react';
 import { InstagramIcon, WhatsAppIcon } from '@/components/shared/BrandIcons';
 import { categories } from '@/data/catalog';
-import { demoPhoneLabel, storeSettings } from '@/data/settings';
+import { storeSettings } from '@/data/settings';
 import { cn, isValidWhatsAppNumber, prefersReducedMotion } from '@/utils/helpers';
 
 const whatsappUrl = storeSettings.whatsappNumber && isValidWhatsAppNumber(storeSettings.whatsappNumber)
@@ -67,10 +67,11 @@ function FooterHeading({ id, icon: Icon, children }: { id?: string; icon: Lucide
 
 export function Footer() {
   const year = new Date().getFullYear();
+  const hasWhatsApp = whatsappUrl !== null;
 
   return (
     <footer className="mt-16 border-t border-border bg-card/30">
-      <div className="container py-10 text-center md:py-14">
+      <div className="wrap mx-auto max-w-6xl px-4 py-10 text-center md:py-14">
         <div className="mx-auto flex max-w-4xl flex-col items-center gap-10">
           {/* Marca + redes sociais */}
           <div className="flex max-w-md flex-col items-center">
@@ -146,7 +147,9 @@ export function Footer() {
                     {href ? (
                       <a href={href} target="_blank" rel="noopener noreferrer" className="flex min-h-11 items-center justify-center break-all rounded-lg px-1 hover:text-primary">{detail}</a>
                     ) : (
-                      <p className="leading-relaxed">{name === 'WhatsApp' ? demoPhoneLabel : detail}{name === 'WhatsApp' && <span className="mt-1 block text-xs">Número de demonstração</span>}</p>
+                      hasWhatsApp ? null : (
+                        <p className="leading-relaxed">{name === 'WhatsApp' ? 'Em breve' : detail}</p>
+                      )
                     )}
                   </div>
                 </li>
@@ -170,7 +173,7 @@ export function Footer() {
       </div>
 
       <div className="border-t border-border">
-        <div className="container flex flex-col items-center justify-center gap-4 py-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] text-center text-xs text-muted-foreground">
+        <div className="wrap mx-auto max-w-6xl px-4 flex flex-col items-center justify-center gap-4 py-6 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] text-center text-xs text-muted-foreground">
           <button
             type="button"
             onClick={() => window.scrollTo({ top: 0, behavior: prefersReducedMotion() ? 'instant' : 'smooth' })}

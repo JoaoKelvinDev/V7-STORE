@@ -14,7 +14,7 @@ export function Layout() {
   }, [pathname]);
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-dvh flex flex-col">
       <a href="#main-content" className="skip-link">
         Pular para o conteúdo principal
       </a>
