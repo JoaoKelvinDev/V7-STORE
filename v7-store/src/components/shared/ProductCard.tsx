@@ -1,67 +1,37 @@
-'use client';
-
-import { buttonVariants } from '@/components/ui/button';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { formatPrice } from '@/utils/helpers';
-import { cn } from '@/utils/helpers';
-import type { Product } from '@/types';
 import { Link, useLocation } from 'react-router-dom';
-import type { CSSProperties } from 'react';
+import type { Product } from '@/types';
+import { cn, formatPrice } from '@/utils/helpers';
 
 interface ProductCardProps {
   product: Product;
   className?: string;
-  /** Posição na grade, usada para a entrada em cascata. */
-  index?: number;
+  headingLevel?: 2 | 3;
 }
 
-export function ProductCard({ product, className, index = 0 }: ProductCardProps) {
+const tags: Record<string, string> = {
+  'polo-verde-oliva': 'Novo',
+  'camiseta-amarela': 'Estampa',
+  'camiseta-caramelo': 'Básico',
+};
+
+export function ProductCard({ product, className, headingLevel = 2 }: ProductCardProps) {
+  const Heading = headingLevel === 3 ? 'h3' : 'h2';
   const { pathname, search } = useLocation();
   const catalogUrl = pathname === '/catalogo' ? `${pathname}${search}` : '/catalogo';
+  const available = product.variants.some(variant => variant.availability === 'available');
+  const tag = available ? tags[product.slug] : 'Indisponível';
 
   return (
-    <Link
-      to={`/produto/${product.slug}`}
-      state={{ catalogUrl }}
-      aria-label={`Ver detalhes de ${product.name}`}
-      className="product-card-link block min-w-0 rounded-lg"
-    >
-    <Card
-      className={cn(
-        'product-card stagger-in flex h-full min-w-0 flex-col gap-3 overflow-hidden rounded-xl py-0 shadow-none sm:gap-4',
-        className,
-      )}
-      style={{ '--i': index } as CSSProperties}
-    >
-      <CardContent className="flex flex-1 flex-col gap-3 px-0 sm:gap-4">
-        <div className="product-photo-link aspect-square shrink-0 overflow-hidden">
-          <img
-            src={product.images[0]}
-            alt={product.name}
-            className="product-image"
-            style={{ objectPosition: product.cardImagePosition ?? 'center' }}
-            loading="lazy"
-            width={400}
-            height={400}
-          />
-        </div>
-        <div className="flex flex-1 flex-col px-3 sm:px-4">
-          <h2 className="mb-2 min-h-[2.5rem] text-sm font-medium leading-snug text-balance sm:text-base">{product.name}</h2>
-          <div className="mt-auto flex items-baseline gap-2">
-            <p className="text-sm font-semibold sm:text-base">
-              {product.priceCents !== null ? formatPrice(product.priceCents) : 'Valor a confirmar'}
-            </p>
-          </div>
-        </div>
-      </CardContent>
-      <CardFooter className="border-t-0 bg-transparent px-3 pb-3 pt-0 sm:px-4 sm:pb-4">
-        <span
-          className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'min-h-11 w-full rounded-lg px-3 text-sm group-hover/card:border-primary/60')}
-        >
-          Ver detalhes
-        </span>
-      </CardFooter>
-    </Card>
+    <Link to={`/produto/${product.slug}`} state={{ catalogUrl }} aria-label={`Ver detalhes de ${product.name}`} className={cn('refresh-product-card', className)}>
+      <div className="refresh-product-media">
+        <img src={product.images[0]} alt={product.name} width={600} height={750} loading="lazy" style={{ objectPosition: product.cardImagePosition ?? 'center' }} />
+        {tag && <span className="refresh-product-tag">{tag}</span>}
+        <span className="refresh-product-cta">Ver detalhes</span>
+      </div>
+      <div className="refresh-product-meta">
+        <Heading>{product.name}</Heading>
+        <p className="refresh-display">{formatPrice(product.priceCents)}</p>
+      </div>
     </Link>
   );
 }

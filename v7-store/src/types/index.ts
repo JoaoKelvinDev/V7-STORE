@@ -90,5 +90,7 @@ export interface Toast {
   id: string;
   type: 'success' | 'error' | 'info';
   message: string;
+  description?: string;
+  action?: { label: string; onClick: () => void };
   duration?: number;
 }

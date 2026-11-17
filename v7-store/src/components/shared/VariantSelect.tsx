@@ -1,15 +1,6 @@
 'use client';
 
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
+import { useId } from 'react';
 import type { ProductVariant } from '@/types';
 
 interface VariantSelectProps {
@@ -29,34 +20,31 @@ export function VariantSelect({
   error,
   required = false,
 }: VariantSelectProps) {
+  const id = useId();
   return (
     <div className="w-full">
-      <Label htmlFor={label.toLowerCase()} className="flex items-center gap-1">
+      <label htmlFor={id} className="text-sm font-bold">
         {label}
         {required && <span className="text-destructive" aria-hidden="true">*</span>}
-      </Label>
-      <Select
+      </label>
+      <select
+        id={id}
+        className="store-native-select"
         value={value}
-        onValueChange={(v: string | null) => { if (v !== null) onChange(v); }}
+        onChange={event => onChange(event.target.value)}
         disabled={options.every(o => o.disabled)}
-        aria-invalid={error ? 'true' : 'false'}
-        aria-required={required}
+        required={required}
+        aria-invalid={Boolean(error)}
+        aria-describedby={error ? `${id}-error` : undefined}
       >
-        <SelectTrigger id={label.toLowerCase()} className="mt-2 w-full px-3 text-base data-[size=default]:h-11 sm:text-sm">
-          <SelectValue placeholder={`Selecione ${label.toLowerCase()}`} />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectGroup>
-            <SelectLabel>{label}</SelectLabel>
-            {options.map(option => (
-              <SelectItem key={option.value} value={option.value} disabled={option.disabled}>
-                {option.label} {option.disabled ? '(indisponível)' : ''}
-              </SelectItem>
-            ))}
-          </SelectGroup>
-        </SelectContent>
-      </Select>
-      {error && <p className="mt-1 text-sm text-destructive" role="alert">{error}</p>}
+        <option value="" disabled>Selecione {label.toLowerCase()}</option>
+        {options.map(option => (
+          <option key={option.value} value={option.value} disabled={option.disabled}>
+            {option.label}{option.disabled ? ' (indisponível)' : ''}
+          </option>
+        ))}
+      </select>
+      {error && <p id={`${id}-error`} className="mt-1 text-sm text-destructive" role="alert">{error}</p>}
     </div>
   );
 }
@@ -82,8 +70,9 @@ export function ColorSizePicker({
   colorError,
   sizeError,
 }: ColorSizePickerProps) {
+  const sizeGroupId = useId();
   return (
-    <div className="grid grid-cols-2 gap-3 sm:gap-4">
+    <div className="grid gap-5">
       {colors.length > 0 && <VariantSelect
         label="Cor"
         options={colors}
@@ -92,14 +81,29 @@ export function ColorSizePicker({
         error={colorError}
         required
       />}
-      {sizes.length > 0 && <VariantSelect
-        label="Tamanho"
-        options={sizes}
-        value={selectedSize}
-        onChange={onSizeChange}
-        error={sizeError}
-        required
-      />}
+      {sizes.length > 0 && (
+        <fieldset aria-describedby={sizeError ? `${sizeGroupId}-error` : undefined} aria-invalid={Boolean(sizeError)}>
+          <legend className="text-sm font-bold">Tamanho <span className="text-destructive" aria-hidden="true">*</span></legend>
+          <div className="store-size-options">
+            {sizes.map(size => (
+              <label key={size.value}>
+                <input
+                  className="store-size-input sr-only"
+                  type="radio"
+                  name={sizeGroupId}
+                  value={size.value}
+                  checked={selectedSize === size.value}
+                  onChange={() => onSizeChange(size.value)}
+                  disabled={size.disabled}
+                  required
+                />
+                <span className="store-size-option">{size.label}</span>
+              </label>
+            ))}
+          </div>
+          {sizeError && <p id={`${sizeGroupId}-error`} className="mt-1 text-sm text-destructive" role="alert">{sizeError}</p>}
+        </fieldset>
+      )}
     </div>
   );
 }

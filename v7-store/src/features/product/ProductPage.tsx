@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
-import { useParams, useLocation, Link } from 'react-router-dom';
+import { useState, useMemo, useEffect, useRef } from 'react';
+import { useParams, useLocation, useNavigate, Link } from 'react-router-dom';
 import { Minus, Plus, ArrowLeft, Check, ShoppingBag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ColorSizePicker, createVariantOptions, findMatchingVariant } from '@/components/shared/VariantSelect';
@@ -23,7 +23,13 @@ function ProductDetails({ product }: { product: Product }) {
   const catalogUrl = typeof navigationState?.catalogUrl === 'string' && /^\/catalogo(?:\?|$)/.test(navigationState.catalogUrl)
     ? navigationState.catalogUrl : '/catalogo';
   const { addItem, getItemQuantity } = useCart();
-  const { showToast } = useToast();
+  const { showToast, dismissToast } = useToast();
+  const navigate = useNavigate();
+  const cartNoticeId = useRef<string | null>(null);
+
+  useEffect(() => () => {
+    if (cartNoticeId.current) dismissToast(cartNoticeId.current);
+  }, [dismissToast]);
 
   const initialVariant = product.variants.find(v => v.availability === 'available') ?? product.variants[0];
   const [selectedColor, setSelectedColor] = useState(initialVariant?.color ?? '');
@@ -77,9 +83,13 @@ function ProductDetails({ product }: { product: Product }) {
       addItem(product.id, matchedVariant.id, quantity);
       setJustAdded(n => n + 1);
       hapticTap();
-      showToast({
+      if (cartNoticeId.current) dismissToast(cartNoticeId.current);
+      cartNoticeId.current = showToast({
         type: 'success',
         message: `${product.name} adicionado ao carrinho`,
+        description: 'Preencha seu nome e o local de retirada. Depois, envie seu pedido pelo WhatsApp.',
+        action: { label: 'Finalizar pedido', onClick: () => navigate('/finalizar') },
+        duration: 0,
       });
     } finally {
       setIsAdding(false);
@@ -92,7 +102,7 @@ function ProductDetails({ product }: { product: Product }) {
         <ArrowLeft className="h-4 w-4" aria-hidden="true" /> Voltar ao catálogo
       </Link>
       <div className="grid min-w-0 gap-4 md:grid-cols-2 md:grid-rows-[auto_1fr] md:items-start md:gap-x-8 md:gap-y-6">
-        <div className="min-w-0 md:col-start-1 md:row-span-2 md:row-start-1">
+        <div className="store-detail-gallery min-w-0 md:col-start-1 md:row-span-2 md:row-start-1">
           <div className="product-gallery-frame">
             <img key={selectedImage} src={selectedImage} alt={product.name} className="gallery-photo" width={800} height={1000} loading="eager" />
           </div>
@@ -107,9 +117,9 @@ function ProductDetails({ product }: { product: Product }) {
           )}
         </div>
         <div className="order-first min-w-0 md:order-none md:col-start-2 md:row-start-1">
-          <p className="text-xs font-bold uppercase tracking-wider text-primary">{category}</p>
-          <h1 className="mt-1 text-2xl font-extrabold sm:text-3xl">{product.name}</h1>
-          <p className="mt-2 text-lg text-muted-foreground">{formatPrice(product.priceCents)}</p>
+          <p className="store-product-label">{category}</p>
+          <h1 className="store-product-title">{product.name}</h1>
+          <p className="store-detail-price">{formatPrice(product.priceCents)}</p>
           <p className={`mt-1 text-sm ${isVariantAvailable ? 'text-green-400' : 'text-destructive'}`}>{isVariantAvailable ? '● Disponível' : 'Indisponível'}</p>
         </div>
         <div className="min-w-0 space-y-5 md:col-start-2 md:row-start-2 md:space-y-6">

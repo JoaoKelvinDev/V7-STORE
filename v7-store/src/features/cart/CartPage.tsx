@@ -29,10 +29,10 @@ export function CartPage() {
   };
 
   return (
-    <div className="container py-8">
+    <div className="container store-flow">
       <div className="mx-auto max-w-3xl">
         <Link to="/catalogo" className="back-link pressable mb-5"><ArrowLeft className="h-4 w-4" aria-hidden="true" />Voltar ao catálogo</Link>
-        <h1 className="mb-6 text-2xl font-extrabold">Seu carrinho</h1>
+        <h1 className="store-flow-title mb-6">Seu carrinho</h1>
         {state.items.length === 0 ? (
           <div className="reveal rounded-xl border border-border bg-card p-8 text-center">
             <ShoppingBag className="mx-auto mb-4 h-12 w-12 text-muted-foreground" aria-hidden="true" />
@@ -79,6 +79,7 @@ export function CartPage() {
               {unavailable ? <p role="alert" className="reveal text-sm text-destructive">Remova os itens indisponíveis antes de finalizar.</p> : (
                 <Link to="/finalizar" className={cn(buttonVariants({ size: 'lg' }), 'group h-12 w-full gap-2 text-base font-bold')}>Continuar pedido <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" aria-hidden="true" /></Link>
               )}
+              {!unavailable && <p className="text-center text-sm leading-relaxed text-muted-foreground">Na próxima etapa, preencha seus dados e envie o pedido pelo WhatsApp.</p>}
             </div>
             <Link to="/catalogo" className="pressable mx-auto mt-2 flex min-h-11 w-fit items-center px-4 text-sm font-semibold text-primary hover:underline">Continuar comprando</Link>
           </>

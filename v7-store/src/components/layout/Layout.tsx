@@ -20,7 +20,7 @@ export function Layout() {
       </a>
       <Header compact={isProductPage} />
       <main id="main-content" className="flex-1" tabIndex={-1}>
-        <div key={pathname} className={isProductPage ? 'animate-fade-in' : 'route-enter'}><Outlet /></div>
+        <div key={pathname} className={pathname === '/' ? undefined : isProductPage ? 'animate-fade-in' : 'route-enter'}><Outlet /></div>
       </main>
       {pathname === '/' && <Footer />}
     </div>

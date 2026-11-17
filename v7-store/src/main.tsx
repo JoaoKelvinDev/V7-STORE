@@ -5,6 +5,8 @@ import { CartProvider } from '@/app/providers/CartProvider'
 import { ToastProvider } from '@/app/providers/ToastProvider'
 import { router } from '@/app/router'
 import '@/styles/globals.css'
+import '@/styles/storefront.css'
+import '@/styles/refresh.css'
 
 function App() {
   return (

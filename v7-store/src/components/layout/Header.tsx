@@ -1,45 +1,70 @@
-'use client';
-
-import { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Search, ShoppingBag } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { Menu, Search, ShoppingBag, ArrowUpRight } from 'lucide-react';
 import { useCart } from '@/app/providers/CartProvider';
-import { RichNavigationMenu } from './RichNavigationMenu';
+import { cn } from '@/utils/helpers';
+
+const collectionLinks = [
+  { label: 'Catálogo', to: '/catalogo', category: '' },
+  { label: 'Camisetas', to: '/catalogo?categoria=camisetas', category: 'camisetas' },
+  { label: 'Polos', to: '/catalogo?categoria=polos', category: 'polos' },
+];
 
 export function Header({ compact = false }: { compact?: boolean }) {
   const { getTotalItems } = useCart();
   const cartCount = getTotalItems();
-  const previousCount = useRef(cartCount);
-  const [bumpKey, setBumpKey] = useState(0);
+  const location = useLocation();
+  const isHome = location.pathname === '/';
+  const [scrolled, setScrolled] = useState(false);
+  const selectedCategory = new URLSearchParams(location.search).get('categoria') ?? '';
 
   useEffect(() => {
-    if (cartCount > previousCount.current) setBumpKey(key => key + 1);
-    previousCount.current = cartCount;
-  }, [cartCount]);
+    if (!isHome) return;
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [isHome]);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur">
-      <div className="wrap mx-auto max-w-6xl px-4 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 py-2">
-        <Link to="/" className="pressable flex min-w-0 items-center gap-3" aria-label="V7 Store — início">
-          <img src="/assets/brand/logo-v7.jpeg" alt="V7 Store" className="h-11 w-auto shrink-0 rounded-md" />
-          <span className="hidden truncate text-sm font-extrabold tracking-widest min-[420px]:inline sm:hidden">V7 STORE</span>
-        </Link>
-        <nav className="flex items-center gap-1">
-          {compact ? <Link to="/catalogo" className="pressable flex min-h-11 items-center rounded-lg px-3 text-sm font-semibold hover:bg-secondary">Catálogo</Link> : <RichNavigationMenu />}
-          {!compact && <Link to="/catalogo" aria-label="Buscar" className="pressable grid h-11 w-11 place-items-center rounded-full hover:bg-secondary">
-            <Search className="h-5 w-5" aria-hidden="true" />
-          </Link>}
-          <Link to="/carrinho" aria-label={`Carrinho${cartCount > 0 ? `, ${cartCount} itens` : ' vazio'}`} className="pressable relative grid h-11 w-11 place-items-center rounded-full hover:bg-secondary">
-            <span key={`bag-${bumpKey}`} className={bumpKey > 0 ? 'cart-bump' : 'inline-flex'}>
-              <ShoppingBag className="h-5 w-5" aria-hidden="true" />
-            </span>
-            {cartCount > 0 && (
-              <span key={`count-${cartCount}`} className="cart-count absolute right-0 top-0 grid h-5 min-w-5 place-items-center rounded-full bg-primary px-1 text-[11px] font-bold text-primary-foreground">
-                {cartCount > 99 ? '99+' : cartCount}
-              </span>
-            )}
+    <header className={cn('refresh-header', isHome && 'refresh-header-home', isHome && scrolled && 'is-scrolled')}>
+      <div className="refresh-header-inner">
+        <Link to="/" className="refresh-wordmark refresh-display" aria-label="V7 Store — início">V7<span>.</span></Link>
+        {!compact && (
+          <nav className="refresh-desktop-nav" aria-label="Navegação principal">
+            {isHome ? <>
+              <a href="#novidades" className="refresh-link-underline">Novidades</a>
+              <a href="#catalogo" className="refresh-link-underline">Catálogo</a>
+              <a href="#sobre" className="refresh-link-underline">Sobre</a>
+            </> : collectionLinks.map(link => (
+              <Link key={link.to} to={link.to} aria-current={location.pathname === '/catalogo' && selectedCategory === link.category ? 'page' : undefined} className="refresh-link-underline">{link.label}</Link>
+            ))}
+          </nav>
+        )}
+        <div className="refresh-header-actions">
+          {isHome && <a href="#novidades" className="refresh-button refresh-button-primary refresh-buy-link">Comprar</a>}
+          {compact ? <Link to="/catalogo" className="refresh-compact-catalog">Catálogo</Link> : !isHome && (
+            <Link to="/catalogo" aria-label="Buscar" className="refresh-icon-button"><Search size={21} strokeWidth={1.6} aria-hidden="true" /></Link>
+          )}
+          {!compact && (
+            <details key={location.key} className="refresh-mobile-menu" onKeyDown={event => {
+              if (event.key === 'Escape') {
+                event.currentTarget.open = false;
+                event.currentTarget.querySelector('summary')?.focus();
+              }
+            }}>
+              <summary className="refresh-icon-button" aria-label="Abrir menu"><Menu size={22} strokeWidth={1.6} aria-hidden="true" /></summary>
+              <nav className="refresh-mobile-menu-panel" aria-label="Menu mobile">
+                <Link to="/">Início <ArrowUpRight size={18} aria-hidden="true" /></Link>
+                {collectionLinks.map(link => <Link to={link.to} key={link.to}>{link.label}<ArrowUpRight size={18} aria-hidden="true" /></Link>)}
+              </nav>
+            </details>
+          )}
+          <Link to="/carrinho" aria-label={`Carrinho${cartCount > 0 ? `, ${cartCount} itens` : ' vazio'}`} className="refresh-icon-button refresh-cart-link">
+            <ShoppingBag size={21} strokeWidth={1.6} aria-hidden="true" />
+            {cartCount > 0 && <span key={cartCount} className="refresh-cart-count">{cartCount > 99 ? '99+' : cartCount}</span>}
           </Link>
-        </nav>
+        </div>
       </div>
     </header>
   );

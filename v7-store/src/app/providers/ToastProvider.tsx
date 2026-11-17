@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useReducer, useEffect, useState, ReactNode, useCallback } from 'react';
-import { CheckCircle2, Info, X, XCircle } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Info, X, XCircle } from 'lucide-react';
 import type { Toast } from '@/types';
 import { generateId, prefersReducedMotion } from '@/utils/helpers';
 
@@ -22,7 +22,7 @@ function toastReducer(state: Toast[], action: ToastAction): Toast[] {
 
 interface ToastContextValue {
   toasts: Toast[];
-  showToast: (toast: Omit<Toast, 'id'>) => void;
+  showToast: (toast: Omit<Toast, 'id'>) => string;
   dismissToast: (id: string) => void;
 }
 
@@ -34,6 +34,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const showToast = useCallback((toast: Omit<Toast, 'id'>) => {
     const id = generateId();
     dispatch({ type: 'ADD', payload: { ...toast, id } });
+    return id;
   }, []);
 
   const dismissToast = useCallback((id: string) => {
@@ -60,7 +61,7 @@ function ToastContainer({ toasts, onDismiss }: { toasts: Toast[]; onDismiss: (id
   if (toasts.length === 0) return null;
 
   return (
-    <div className="toast-stack fixed bottom-[max(1.5rem,env(safe-area-inset-bottom))] left-1/2 z-[100] flex w-[calc(100%-2rem)] max-w-md -translate-x-1/2 flex-col gap-2 pointer-events-none">
+    <div className="toast-stack fixed bottom-[max(1.5rem,env(safe-area-inset-bottom))] left-1/2 z-[100] flex max-h-[calc(100dvh-9rem)] w-[calc(100%-2rem)] max-w-md -translate-x-1/2 flex-col gap-2 overflow-y-auto overscroll-contain pointer-events-none">
       {toasts.map(toast => (
         <ToastItem
           key={toast.id}
@@ -105,16 +106,31 @@ function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: (id: string)
 
   return (
     <div
-      className={`toast ${toast.type} pointer-events-auto flex items-center gap-3 px-4 py-3 ${leaving ? 'toast-out' : 'toast-in'}`}
+      className={`toast ${toast.type} pointer-events-auto flex shrink-0 ${toast.action ? 'items-start' : 'items-center'} gap-3 px-4 py-3 ${leaving ? 'toast-out' : 'toast-in'}`}
       role={toast.type === 'error' ? 'alert' : 'status'}
       aria-live={toast.type === 'error' ? 'assertive' : 'polite'}
     >
       {icons[toast.type]}
-      <span className="text-sm font-medium">{toast.message}</span>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-semibold leading-relaxed">{toast.message}</p>
+        {toast.description && <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{toast.description}</p>}
+        {toast.action && (
+          <button
+            type="button"
+            className="mt-3 flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
+            onClick={() => {
+              onDismiss(toast.id);
+              toast.action?.onClick();
+            }}
+          >
+            {toast.action.label}<ArrowRight className="h-4 w-4" aria-hidden="true" />
+          </button>
+        )}
+      </div>
       <button
         type="button"
         onClick={close}
-        className="ml-auto -mr-2 grid h-10 w-10 shrink-0 place-items-center rounded-lg text-muted-foreground hover:bg-secondary hover:text-foreground"
+        className="ml-auto -mr-2 grid h-11 w-11 shrink-0 place-items-center rounded-lg text-muted-foreground hover:bg-secondary hover:text-foreground"
         aria-label="Fechar notificação"
       >
         <X className="h-4 w-4" aria-hidden="true" />
