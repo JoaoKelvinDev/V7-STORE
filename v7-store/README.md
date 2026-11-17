@@ -53,7 +53,7 @@ Os testes cobrem navegação de produtos, filtros combinados, carrinho, persist�
 - O telefone `(00) 00000-0000` é apenas uma informação visual de demonstração. Os dados comerciais do catálogo precisam de confirmação antes de uso real.
 - A loja não envia mensagens automaticamente: o cliente confirma o envio no WhatsApp.
 
-Para hospedagem estática, configure fallback das rotas para `index.html`.
+O arquivo `vercel.json` configura o fallback das rotas para `index.html` na Vercel, permitindo abrir produtos, catálogo, carrinho e checkout diretamente ou recarregar essas páginas.
 
 ## Documentação
 
